@@ -567,10 +567,14 @@
     }
 
     .detail-floating-card {
-      position: relative;
-      margin: 116px 16px 0;
+      position: absolute;
+      top: 30px;
+      left: 16px;
+      right: 16px;
+      z-index: 1;
       border-radius: 26px;
-      padding: 18px 18px 16px;
+      padding: 106px 18px 16px;
+      background: rgba(255, 255, 255, 0.97);
     }
 
     .detail-type {
@@ -601,7 +605,7 @@
     }
 
     .detail-note {
-      margin: 14px 16px 0;
+      margin: 292px 16px 0;
       padding: 14px 16px;
       border-radius: 18px;
       background: rgba(255,255,255,0.92);
@@ -1282,8 +1286,32 @@
       return products.filter((item) => item[key].includes(iso));
     }
 
+    function getRenderedProductsForDate(iso, tab) {
+      const key = tab === "purchase" ? "purchaseDates" : "redeemDates";
+      const exact = getProductsForDate(iso, tab);
+      if (exact.length === 0) {
+        return [];
+      }
+      if (exact.length >= 2) {
+        return exact.slice(0, 10);
+      }
+
+      const seed = exact[0];
+      const supplemental = products.filter((item) => {
+        if (exact.some((target) => target.id === item.id)) {
+          return false;
+        }
+        if (item.category !== seed.category) {
+          return false;
+        }
+        return item[key].some((date) => date.startsWith(iso.slice(0, 7)));
+      });
+
+      return [...exact, ...supplemental].slice(0, 10);
+    }
+
     function getCalendarCount(iso) {
-      let list = getProductsForDate(iso, state.tab);
+      let list = getRenderedProductsForDate(iso, state.tab);
       if (state.type !== "all") {
         list = list.filter((item) => item.category === state.type);
       }
@@ -1387,7 +1415,7 @@
       elements.selectedSummary.textContent = summaryText();
       buildListFilters();
 
-      let list = getProductsForDate(state.selectedDate, state.tab);
+      let list = getRenderedProductsForDate(state.selectedDate, state.tab);
       if (state.type !== "all") {
         list = list.filter((item) => item.category === state.type);
       }
@@ -1407,7 +1435,7 @@
         card.innerHTML = `
           <div class="product-top">
             <h5 class="product-name">${item.name}</h5>
-            ${state.tab === "purchase" ? `<button class="alert-btn${item.reminder ? " active" : ""}" type="button">${item.reminder ? "已提醒" : "开售提醒"}</button>` : ""}
+            ${state.tab === "purchase" ? `<button class="alert-btn${item.reminder ? " active" : ""}" type="button">${item.reminder ? "已加提醒" : "开售提醒"}</button>` : ""}
           </div>
           <div class="product-sub">
             <span class="risk-pill">${item.risk}</span>
@@ -1428,7 +1456,7 @@
           alertBtn.addEventListener("click", (event) => {
             event.stopPropagation();
             item.reminder = !item.reminder;
-            showToast(item.reminder ? "已加入开售提醒" : "已取消开售提醒");
+            showToast(item.reminder ? "已添加至开售提醒" : "已取消开售提醒");
             renderProducts();
             renderCalendar();
           });
