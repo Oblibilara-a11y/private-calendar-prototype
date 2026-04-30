@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>私募产品日历需求原型</title>
+  <style>
+    :root {
+      --bg: #f4efe8;
+      --card: #fffdf9;
+      --card-soft: #f9f4ee;
+      --line: rgba(116, 87, 48, 0.12);
+      --text: #1d232f;
+      --muted: #7b6f61;
+      --brand: #b98047;
+      --brand-deep: #84552e;
+      --accent: #e5483f;
+      --green: #0f8e5a;
+      --shadow: 0 20px 50px rgba(83, 58, 28, 0.16);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --phone-w: 430px;
+      --phone-h: 815px;
+      --font: "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at 0 0, rgba(185, 128, 71, 0.16), transparent 28%),
+        radial-gradient(circle at 100% 100%, rgba(229, 72, 63, 0.12), transparent 24%),
+        linear-gradient(180deg, #efe8de 0%, #f7f3ed 40%, #f1ece5 100%);
+      color: var(--text);
+      font-family: var(--font);
+    }
+
+    .layout {
+      width: min(1180px, 100%);
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) auto;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .brief {
+      padding: 28px;
+      border-radius: 30px;
+      background: rgba(255, 253, 249, 0.78);
+      border: 1px solid rgba(132, 85, 46, 0.1);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .brief h1 {
+      margin: 0 0 12px;
+      font-size: 34px;
+      line-height: 1.08;
+    }
+
+    .brief p {
+      margin: 0 0 18px;
+      color: #5f564c;
+      line-height: 1.7;
+    }
+
+    .tag-row,
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .tag {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(185, 128, 71, 0.12);
+      color: #6d4825;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .legend {
+      margin-top: 14px;
+    }
+
+    .legend .tag {
+      background: #fff;
+      border: 1px solid rgba(132, 85, 46, 0.12);
+      color: #5d5143;
+      font-weight: 600;
+    }
+
+    .phone-shell {
+      width: var(--phone-w);
+      height: var(--phone-h);
+      border-radius: 42px;
+      padding: 10px;
+      background:
+        linear-gradient(160deg, rgba(255,255,255,0.96), rgba(231,221,208,0.92)),
+        #efe7dc;
+      box-shadow:
+        0 24px 48px rgba(61, 46, 31, 0.2),
+        inset 0 0 0 1px rgba(255,255,255,0.9);
+    }
+
+    .phone-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 34px;
+      background: var(--bg);
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.74), rgba(244,239,232,0.96) 16%, #f4efe8 100%);
+      scrollbar-width: none;
+    }
+
+    .screen::-webkit-scrollbar {
+      display: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      padding: 14px 18px 12px;
+      background: linear-gradient(180deg, rgba(244,239,232,0.96), rgba(244,239,232,0.75));
+      backdrop-filter: blur(14px);
+    }
+
+    .status-bar,
+    .nav-row,
+    .tab-row,
+    .filter-row,
+    .section-head,
+    .detail-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .status-bar {
+      margin-bottom: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #2a231c;
+    }
+
+    .status-icons {
+      display: flex;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .nav-title {
+      flex: 1;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    button {
+      font: inherit;
+      border: 0;
+      background: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .icon-btn,
+    .tab,
+    .chip,
+    .switch-chip,
+    .calendar-day,
+    .product-card,
+    .sheet-option,
+    .dialog-action {
+      transition: all 0.22s ease;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.78);
+      box-shadow: 0 6px 16px rgba(89, 62, 31, 0.08);
+      color: #45392d;
+      font-size: 20px;
+    }
+
+    .tab-row {
+      margin-top: 16px;
+      padding: 4px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.72);
+      gap: 6px;
+    }
+
+    .tab {
+      flex: 1;
+      min-height: 42px;
+      border-radius: 999px;
+      color: #786b5c;
+      font-weight: 700;
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, #ca9761, #b67b3f);
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(185, 128, 71, 0.28);
+    }
+
+    .content {
+      padding: 14px 16px 26px;
+    }
+
+    .tip-banner,
+    .panel,
+    .product-card,
+    .detail-floating-card,
+    .detail-note {
+      background: var(--card);
+      border: 1px solid rgba(132, 85, 46, 0.08);
+      box-shadow: 0 12px 30px rgba(95, 67, 34, 0.08);
+    }
+
+    .tip-banner {
+      position: relative;
+      padding: 14px 46px 14px 16px;
+      border-radius: 18px;
+      margin-bottom: 14px;
+    }
+
+    .tip-banner strong {
+      display: inline-block;
+      margin-right: 8px;
+      color: var(--brand-deep);
+    }
+
+    .tip-banner p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.65;
+      color: #665a4e;
+    }
+
+    .tip-link {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .tip-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(123, 111, 97, 0.1);
+      color: #7f7265;
+    }
+
+    .panel {
+      padding: 16px;
+      border-radius: 22px;
+      margin-bottom: 14px;
+    }
+
+    .filter-row {
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: var(--card-soft);
+      color: #5f5144;
+      font-weight: 700;
+      box-shadow: inset 0 0 0 1px rgba(132, 85, 46, 0.08);
+    }
+
+    .calendar-head {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+      padding: 0 2px;
+      color: #8a7d6d;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .calendar-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .calendar-week {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .calendar-day {
+      position: relative;
+      min-height: 62px;
+      padding: 10px 8px;
+      border-radius: 16px;
+      background: #fbf8f3;
+      color: #54483d;
+      text-align: left;
+      box-shadow: inset 0 0 0 1px rgba(132, 85, 46, 0.06);
+    }
+
+    .calendar-day:hover,
+    .product-card:hover,
+    .sheet-option:hover,
+    .chip:hover,
+    .switch-chip:hover,
+    .dialog-action:hover {
+      transform: translateY(-1px);
+    }
+
+    .calendar-day.selected {
+      background: linear-gradient(160deg, rgba(185, 128, 71, 0.22), rgba(255,255,255,0.98));
+      box-shadow: inset 0 0 0 1px rgba(185, 128, 71, 0.22);
+    }
+
+    .calendar-day.empty {
+      background: rgba(255,255,255,0.45);
+      color: #b3a89d;
+      cursor: default;
+      transform: none;
+    }
+
+    .calendar-day.holiday::after {
+      content: "休";
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      font-size: 10px;
+      color: #c7a27a;
+      font-weight: 700;
+    }
+
+    .day-no {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .day-sub {
+      margin-top: 5px;
+      font-size: 11px;
+      color: #948779;
+    }
+
+    .day-dot {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(229, 72, 63, 0.12);
+    }
+
+    .toggle-link {
+      margin-top: 12px;
+      width: 100%;
+      min-height: 40px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #fbf6ef, #f5ede2);
+      color: #74563b;
+      font-weight: 700;
+    }
+
+    .section-head {
+      margin-bottom: 12px;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .section-subtitle {
+      margin-top: 4px;
+      color: #8b7d70;
+      font-size: 12px;
+    }
+
+    .switch-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .switch-chip {
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: #f4eee6;
+      color: #75685a;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .switch-chip.active {
+      background: rgba(15, 142, 90, 0.12);
+      color: var(--green);
+    }
+
+    .product-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .product-card {
+      padding: 14px;
+      border-radius: 18px;
+      min-height: 120px;
+    }
+
+    .product-top,
+    .product-sub,
+    .metric-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .product-name {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1.4;
+    }
+
+    .alert-btn {
+      flex-shrink: 0;
+      min-width: 88px;
+      min-height: 32px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: rgba(229, 72, 63, 0.1);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .alert-btn.active {
+      background: rgba(15, 142, 90, 0.12);
+      color: var(--green);
+    }
+
+    .product-sub {
+      margin-top: 8px;
+      justify-content: flex-start;
+      color: #84786c;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .risk-pill {
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(185, 128, 71, 0.12);
+      color: #7a5733;
+    }
+
+    .metric-row {
+      margin-top: 12px;
+      align-items: stretch;
+    }
+
+    .metric-box {
+      flex: 1;
+      min-width: 0;
+      padding: 10px 8px;
+      border-radius: 14px;
+      background: #faf6f0;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 17px;
+      font-weight: 800;
+      color: #202632;
+      white-space: nowrap;
+    }
+
+    .metric-value.hot {
+      color: var(--accent);
+    }
+
+    .metric-label {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #8b7e70;
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      padding: 22px 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.72);
+      text-align: center;
+      color: #8b7f73;
+      font-size: 13px;
+    }
+
+    .detail-screen {
+      background: #f7f7f7;
+    }
+
+    .detail-hero {
+      position: relative;
+      min-height: 100%;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.04)),
+        url("./产品详情落地页.png") top center / 100% auto no-repeat,
+        #f7f7f7;
+      padding-bottom: 34px;
+    }
+
+    .detail-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      padding: 16px 18px 0;
+    }
+
+    .detail-floating-card {
+      position: relative;
+      margin: 116px 16px 0;
+      border-radius: 26px;
+      padding: 18px 18px 16px;
+    }
+
+    .detail-type {
+      color: var(--brand-deep);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
+    .detail-name {
+      margin: 10px 0 6px;
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    .detail-code {
+      color: #7f7267;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .detail-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .detail-note {
+      margin: 14px 16px 0;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.92);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: #6f6255;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .detail-spacer {
+      height: 870px;
+    }
+
+    .overlay,
+    .sheet-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(30, 32, 38, 0.48);
+      backdrop-filter: blur(10px);
+    }
+
+    .dialog,
+    .sheet {
+      width: 100%;
+      border-radius: 24px;
+      background: #fffdfb;
+      box-shadow: 0 26px 56px rgba(28, 24, 19, 0.26);
+    }
+
+    .dialog {
+      max-width: 360px;
+      padding: 24px 20px 18px;
+    }
+
+    .dialog h3 {
+      margin: 0 0 12px;
+      font-size: 20px;
+    }
+
+    .dialog p {
+      margin: 0;
+      color: #63584e;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .dialog-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .dialog-action {
+      flex: 1;
+      min-height: 44px;
+      border-radius: 14px;
+      font-weight: 800;
+    }
+
+    .dialog-action.secondary {
+      background: #f1ece5;
+      color: #6f6458;
+    }
+
+    .dialog-action.primary {
+      background: linear-gradient(135deg, #cc9860, #b87d40);
+      color: #fff;
+    }
+
+    .sheet-overlay {
+      align-items: flex-end;
+      padding: 0;
+      background: rgba(24, 22, 20, 0.34);
+    }
+
+    .sheet {
+      border-radius: 28px 28px 0 0;
+      padding: 18px 16px 28px;
+    }
+
+    .sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .sheet-title {
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .sheet-options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .sheet-option {
+      min-height: 50px;
+      padding: 0 16px;
+      border-radius: 16px;
+      background: #f7f2eb;
+      color: #605347;
+      font-weight: 800;
+      text-align: left;
+    }
+
+    .sheet-option.active {
+      background: rgba(185, 128, 71, 0.14);
+      color: var(--brand-deep);
+      box-shadow: inset 0 0 0 1px rgba(185, 128, 71, 0.18);
+    }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%);
+      z-index: 12;
+      min-width: 200px;
+      max-width: calc(100% - 36px);
+      padding: 12px 16px;
+      border-radius: 14px;
+      background: rgba(33, 30, 27, 0.86);
+      color: #fff;
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.5;
+      box-shadow: 0 16px 30px rgba(0,0,0,0.22);
+    }
+
+    @media (max-width: 1040px) {
+      body {
+        padding: 20px;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+        justify-items: center;
+      }
+
+      .brief {
+        width: min(100%, 640px);
+      }
+    }
+
+    @media (max-width: 520px) {
+      body {
+        padding: 0;
+      }
+
+      .layout {
+        width: 100%;
+        gap: 0;
+      }
+
+      .brief {
+        display: none;
+      }
+
+      .phone-shell {
+        width: 100%;
+        height: 100vh;
+        border-radius: 0;
+        padding: 0;
+      }
+
+      .phone-inner {
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="brief">
+      <h1>私募产品日历原型</h1>
+      <p>双层页面结构，覆盖认/申购日历、赎回日历、月度交易日历、类型筛选、持仓筛选、开售提醒、产品详情页和风险等级拦截。页面按手机视图设计，单屏尺寸为 430 x 815。</p>
+      <div class="tag-row">
+        <span class="tag">用户风险等级：C3</span>
+        <span class="tag">月份：2026 年 4 月 / 5 月</span>
+        <span class="tag">产品名称与代码来自 Excel 台账</span>
+      </div>
+      <div class="legend">
+        <span class="tag">小红点：当日有开放产品</span>
+        <span class="tag">点击卡片：进入产品详情</span>
+        <span class="tag">高于 C3 的产品会出现风险蒙层</span>
+      </div>
+    </aside>
+
+    <div class="phone-shell">
+      <div class="phone-inner">
+        <section class="screen" id="calendarScreen">
+          <div class="topbar">
+            <div class="status-bar">
+              <span>19:20</span>
+              <div class="status-icons">
+                <span>静音</span>
+                <span>5G</span>
+                <span>100%</span>
+              </div>
+            </div>
+            <div class="nav-row">
+              <button class="icon-btn" type="button">‹</button>
+              <div class="nav-title">产品日历</div>
+              <button class="icon-btn" type="button">⌕</button>
+            </div>
+            <div class="tab-row">
+              <button class="tab active" type="button" data-tab="purchase">认/申购日历</button>
+              <button class="tab" type="button" data-tab="redeem">赎回日历</button>
+            </div>
+          </div>
+
+          <div class="content">
+            <div class="tip-banner" id="tipBanner">
+              <button class="tip-close" id="closeTipBanner" type="button">×</button>
+              <p><strong>提示</strong> 日期为“开放日”，有冷静期的产品，请在“开放日”前一交易日 15:00 前购买下单。开放日仅供参考，具体以实际开放时间为准。<button class="tip-link" id="openTipDialog" type="button">查看更多 &gt;</button></p>
+            </div>
+
+            <div class="panel">
+              <div class="filter-row">
+                <button class="chip" id="monthTrigger" type="button">2026 年 4 月</button>
+                <button class="chip" id="typeTrigger" type="button">全部类型</button>
+              </div>
+              <div class="calendar-head">
+                <span>周一</span>
+                <span>周二</span>
+                <span>周三</span>
+                <span>周四</span>
+                <span>周五</span>
+              </div>
+              <div class="calendar-grid" id="calendarGrid"></div>
+              <button class="toggle-link" id="toggleCalendar" type="button">收起为单周视图</button>
+            </div>
+
+            <div class="panel">
+              <div class="section-head">
+                <div>
+                  <div class="section-title" id="selectedDateText">04-30（周四）</div>
+                  <div class="section-subtitle" id="selectedSummary">认/申购日历 · 全部类型</div>
+                </div>
+              </div>
+              <div class="switch-group" id="listFilters"></div>
+              <div class="product-list" id="productList"></div>
+              <div class="empty-state hidden" id="emptyState">当前筛选条件下暂无产品，请切换日期或筛选项查看。</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen detail-screen hidden" id="detailScreen">
+          <div class="detail-hero">
+            <div class="detail-topbar">
+              <div class="detail-head">
+                <button class="icon-btn" id="detailBack" type="button">‹</button>
+                <div class="nav-title">产品详情</div>
+                <div style="width:34px"></div>
+              </div>
+            </div>
+
+            <div class="detail-floating-card">
+              <div class="detail-type" id="detailType">固收私募 · 资管</div>
+              <div class="detail-name" id="detailName">国金慧多利债券 1 号</div>
+              <div class="detail-code" id="detailCode">产品代码 DB3006</div>
+              <div class="detail-metrics" id="detailMetrics"></div>
+            </div>
+
+            <div class="detail-note" id="detailNote"></div>
+            <div class="detail-spacer"></div>
+          </div>
+
+          <div class="overlay hidden" id="riskOverlay">
+            <div class="dialog">
+              <h3>风险提示</h3>
+              <p>本基金风险等级或投资期限或投资品种与您的风险测评结果不匹配（点击查看我的风险测评结果）。我司未向您主动推荐，建议您审慎考虑，如需查看请点击“继续查看”。</p>
+              <div class="dialog-actions">
+                <button class="dialog-action secondary" id="riskBack" type="button">返回</button>
+                <button class="dialog-action primary" id="riskContinue" type="button">继续查看</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="overlay hidden" id="tipDialog">
+          <div class="dialog">
+            <h3>认/申购日历提示</h3>
+            <p>例如，如果开放日为 2026 年 4 月 23 日，则最后下单日为 2026 年 4 月 22 日。开放日展示的是交易参考日期，实际购买时间请以产品具体公告为准。</p>
+            <div class="dialog-actions">
+              <button class="dialog-action primary" id="closeTipDialog" type="button">我知道了</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sheet-overlay hidden" id="sheetOverlay">
+          <div class="sheet">
+            <div class="sheet-header">
+              <div class="sheet-title" id="sheetTitle">选择月份</div>
+              <button class="icon-btn" id="closeSheet" type="button">×</button>
+            </div>
+            <div class="sheet-options" id="sheetOptions"></div>
+          </div>
+        </div>
+
+        <div class="toast hidden" id="toast"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const userRisk = "C3";
+    const riskRank = { R1: 1, R2: 2, R3: 3, R4: 4, R5: 5, C3: 3 };
+    const holidayMap = {
+      "2026-04-06": "清明节休市",
+      "2026-05-01": "劳动节休市",
+      "2026-05-04": "劳动节休市",
+      "2026-05-05": "劳动节休市"
+    };
+
+    const monthOptions = [
+      { key: "2026-04", label: "2026 年 4 月" },
+      { key: "2026-05", label: "2026 年 5 月" }
+    ];
+
+    const typeOptions = [
+      { key: "all", label: "全部类型" },
+      { key: "fixed", label: "固收私募" },
+      { key: "equity", label: "权益私募" }
+    ];
+
+    const products = [
+      {
+        id: "p1",
+        name: "国金慧多利债券1号",
+        code: "DB3006",
+        templateId: "10011",
+        category: "fixed",
+        subtype: "资管",
+        risk: "R2",
+        holding: true,
+        reminder: true,
+        purchaseDates: ["2026-04-02", "2026-04-23", "2026-05-07"],
+        redeemDates: ["2026-04-16", "2026-05-14"],
+        metrics: [
+          { label: "业绩报酬计提基准", value: "2.42%", hot: true },
+          { label: "投资期限", value: "182天" },
+          { label: "起购金额", value: "30万" }
+        ],
+        detailBrief: ["R2中低风险", "30万起购", "开放日参考下单"]
+      },
+      {
+        id: "p2",
+        name: "国金慧多利债券5号",
+        code: "DB3010",
+        templateId: "10011",
+        category: "fixed",
+        subtype: "资管",
+        risk: "R3",
+        holding: true,
+        reminder: false,
+        purchaseDates: ["2026-04-09", "2026-04-30", "2026-05-21"],
+        redeemDates: ["2026-04-24", "2026-05-28"],
+        metrics: [
+          { label: "业绩报酬计提基准", value: "2.56%", hot: true },
+          { label: "投资期限", value: "273天" },
+          { label: "起购金额", value: "100万" }
+        ],
+        detailBrief: ["R3中风险", "100万起购", "封闭期后开放"]
+      },
+      {
+        id: "p3",
+        name: "上海信托“红宝石”安心稳健系列投资资金信托基金（第504期）",
+        code: "GJ2505",
+        templateId: "10000",
+        category: "fixed",
+        subtype: "信托",
+        risk: "R2",
+        holding: false,
+        reminder: true,
+        purchaseDates: ["2026-04-14", "2026-05-12"],
+        redeemDates: ["2026-04-28", "2026-05-26"],
+        metrics: [
+          { label: "业绩比较基准", value: "2.49%", hot: true },
+          { label: "投资期限", value: "364天" },
+          { label: "起购金额", value: "100万" }
+        ],
+        detailBrief: ["R2中低风险", "100万起购", "收益按合同约定"]
+      },
+      {
+        id: "p4",
+        name: "现金丰利(B类国金证券)",
+        code: "600516",
+        templateId: "10013",
+        category: "fixed",
+        subtype: "现金管理",
+        risk: "R1",
+        holding: true,
+        reminder: false,
+        purchaseDates: ["2026-04-01", "2026-04-21", "2026-05-06", "2026-05-18"],
+        redeemDates: ["2026-04-08", "2026-04-22", "2026-05-13", "2026-05-27"],
+        metrics: [
+          { label: "七日年化收益率", value: "1.9832%", hot: true },
+          { label: "万份收益", value: "0.5321" },
+          { label: "起购金额", value: "30万" }
+        ],
+        detailBrief: ["R1低风险", "30万起购", "现金管理类产品"]
+      },
+      {
+        id: "p5",
+        name: "涨跌宝双向鲨鱼鳍18期（SGE黄金9999）",
+        code: "SRXC07",
+        templateId: "10012",
+        category: "fixed",
+        subtype: "收益凭证",
+        risk: "R3",
+        holding: false,
+        reminder: false,
+        purchaseDates: ["2026-04-17", "2026-05-19"],
+        redeemDates: ["2026-04-29", "2026-05-29"],
+        metrics: [
+          { label: "约定年化收益率", value: "2.68%", hot: true },
+          { label: "投资期限", value: "182天" },
+          { label: "起购金额", value: "100万" }
+        ],
+        detailBrief: ["R3中风险", "100万起购", "挂钩标的收益结构"]
+      },
+      {
+        id: "p6",
+        name: "国金证券慧享2号债券增强集合资产管理计划",
+        code: "DB3091",
+        templateId: "10002",
+        category: "fixed",
+        subtype: "资管",
+        risk: "R3",
+        holding: false,
+        reminder: true,
+        purchaseDates: ["2026-04-07", "2026-05-20"],
+        redeemDates: ["2026-04-27", "2026-05-22"],
+        metrics: [
+          { label: "业绩报酬计提基准", value: "2.51%", hot: true },
+          { label: "投资期限", value: "364天" },
+          { label: "起购金额", value: "30万" }
+        ],
+        detailBrief: ["R3中风险", "30万起购", "债券增强策略"]
+      },
+      {
+        id: "p7",
+        name: "国金证券7天盈1号集合资产管理计划",
+        code: "DB3045",
+        templateId: "10006",
+        category: "fixed",
+        subtype: "资管",
+        risk: "R2",
+        holding: true,
+        reminder: true,
+        purchaseDates: ["2026-04-15", "2026-05-08"],
+        redeemDates: ["2026-04-20", "2026-05-15"],
+        metrics: [
+          { label: "业绩报酬计提基准", value: "2.45%", hot: true },
+          { label: "投资期限", value: "91天" },
+          { label: "起购金额", value: "30万" }
+        ],
+        detailBrief: ["R2中低风险", "30万起购", "短久期资金安排"]
+      },
+      {
+        id: "p8",
+        name: "国金证券金泽益1号集合资产管理计划",
+        code: "DB1129",
+        templateId: "10010",
+        category: "equity",
+        subtype: "权益私募",
+        risk: "R3",
+        holding: true,
+        reminder: false,
+        purchaseDates: ["2026-04-10", "2026-05-07"],
+        redeemDates: ["2026-04-30", "2026-05-21"],
+        metrics: [
+          { label: "近一年收益率", value: "18.90%", hot: true },
+          { label: "单位净值", value: "1.2436" },
+          { label: "起投金额", value: "100万" }
+        ],
+        detailBrief: ["R3中风险", "100万起投", "主动管理权益策略"]
+      },
+      {
+        id: "p9",
+        name: "塞帕思哥伦布一号指数增强私募证券投资基金",
+        code: "SGK940",
+        templateId: "10010",
+        category: "equity",
+        subtype: "权益私募",
+        risk: "R4",
+        holding: false,
+        reminder: true,
+        purchaseDates: ["2026-04-23", "2026-05-14"],
+        redeemDates: ["2026-04-30", "2026-05-28"],
+        metrics: [
+          { label: "近一年收益率", value: "22.34%", hot: true },
+          { label: "单位净值", value: "1.3189" },
+          { label: "起投金额", value: "100万" }
+        ],
+        detailBrief: ["R4中高风险", "100万起投", "指数增强策略"]
+      },
+      {
+        id: "p10",
+        name: "国金证券金欣益1号集合资产管理计划",
+        code: "DB1130",
+        templateId: "10010",
+        category: "equity",
+        subtype: "权益私募",
+        risk: "R4",
+        holding: true,
+        reminder: false,
+        purchaseDates: ["2026-04-14", "2026-05-26"],
+        redeemDates: ["2026-04-21", "2026-05-20"],
+        metrics: [
+          { label: "近一年收益率", value: "16.72%", hot: true },
+          { label: "单位净值", value: "1.1721" },
+          { label: "起投金额", value: "100万" }
+        ],
+        detailBrief: ["R4中高风险", "100万起投", "多策略组合"]
+      },
+      {
+        id: "p11",
+        name: "大朴策略6号私募证券投资基金",
+        code: "SGT398",
+        templateId: "10010",
+        category: "equity",
+        subtype: "权益私募",
+        risk: "R5",
+        holding: false,
+        reminder: true,
+        purchaseDates: ["2026-04-28", "2026-05-12"],
+        redeemDates: ["2026-04-15", "2026-05-27"],
+        metrics: [
+          { label: "近一年收益率", value: "27.18%", hot: true },
+          { label: "单位净值", value: "1.4068" },
+          { label: "起投金额", value: "100万" }
+        ],
+        detailBrief: ["R5高风险", "100万起投", "高波动权益策略"]
+      },
+      {
+        id: "p12",
+        name: "国金证券金煜鑫1号FOF集合资产管理计划",
+        code: "DB1128",
+        templateId: "10010",
+        category: "equity",
+        subtype: "权益私募",
+        risk: "R3",
+        holding: true,
+        reminder: true,
+        purchaseDates: ["2026-04-01", "2026-05-06"],
+        redeemDates: ["2026-04-24", "2026-05-19"],
+        metrics: [
+          { label: "近一年收益率", value: "14.58%", hot: true },
+          { label: "单位净值", value: "1.1352" },
+          { label: "起投金额", value: "100万" }
+        ],
+        detailBrief: ["R3中风险", "100万起投", "FOF 配置策略"]
+      }
+    ];
+
+    const state = {
+      tab: "purchase",
+      month: "2026-04",
+      type: "all",
+      collapsed: false,
+      selectedDate: "2026-04-30",
+      showHeldOnly: false,
+      showReminderOnly: false,
+      detailProduct: null,
+      currentSheet: null
+    };
+
+    const elements = {
+      calendarScreen: document.getElementById("calendarScreen"),
+      detailScreen: document.getElementById("detailScreen"),
+      tabs: [...document.querySelectorAll(".tab")],
+      tipBanner: document.getElementById("tipBanner"),
+      closeTipBanner: document.getElementById("closeTipBanner"),
+      openTipDialog: document.getElementById("openTipDialog"),
+      tipDialog: document.getElementById("tipDialog"),
+      closeTipDialog: document.getElementById("closeTipDialog"),
+      monthTrigger: document.getElementById("monthTrigger"),
+      typeTrigger: document.getElementById("typeTrigger"),
+      calendarGrid: document.getElementById("calendarGrid"),
+      toggleCalendar: document.getElementById("toggleCalendar"),
+      selectedDateText: document.getElementById("selectedDateText"),
+      selectedSummary: document.getElementById("selectedSummary"),
+      listFilters: document.getElementById("listFilters"),
+      productList: document.getElementById("productList"),
+      emptyState: document.getElementById("emptyState"),
+      detailBack: document.getElementById("detailBack"),
+      detailType: document.getElementById("detailType"),
+      detailName: document.getElementById("detailName"),
+      detailCode: document.getElementById("detailCode"),
+      detailMetrics: document.getElementById("detailMetrics"),
+      detailNote: document.getElementById("detailNote"),
+      riskOverlay: document.getElementById("riskOverlay"),
+      riskBack: document.getElementById("riskBack"),
+      riskContinue: document.getElementById("riskContinue"),
+      sheetOverlay: document.getElementById("sheetOverlay"),
+      sheetTitle: document.getElementById("sheetTitle"),
+      sheetOptions: document.getElementById("sheetOptions"),
+      closeSheet: document.getElementById("closeSheet"),
+      toast: document.getElementById("toast")
+    };
+
+    function pad(value) {
+      return String(value).padStart(2, "0");
+    }
+
+    function parseISO(iso) {
+      const [y, m, d] = iso.split("-").map(Number);
+      return new Date(y, m - 1, d);
+    }
+
+    function toISO(date) {
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    }
+
+    function formatDateLabel(iso) {
+      const date = parseISO(iso);
+      const weekday = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][date.getDay()];
+      return `${pad(date.getMonth() + 1)}-${pad(date.getDate())}（${weekday}）`;
+    }
+
+    function getMonthLabel(month) {
+      return monthOptions.find((item) => item.key === month)?.label || month;
+    }
+
+    function getTypeLabel(type) {
+      return typeOptions.find((item) => item.key === type)?.label || type;
+    }
+
+    function isTradingDay(iso) {
+      const date = parseISO(iso);
+      const day = date.getDay();
+      return day >= 1 && day <= 5 && !holidayMap[iso];
+    }
+
+    function buildCalendarWeeks(month) {
+      const [year, monthNo] = month.split("-").map(Number);
+      const first = new Date(year, monthNo - 1, 1);
+      const last = new Date(year, monthNo, 0);
+      const start = new Date(first);
+      start.setDate(first.getDate() - ((first.getDay() + 6) % 7));
+      const end = new Date(last);
+      end.setDate(last.getDate() + (5 - ((last.getDay() + 6) % 7)));
+
+      const weeks = [];
+      for (let cursor = new Date(start); cursor <= end; cursor.setDate(cursor.getDate() + 7)) {
+        const week = [];
+        for (let offset = 0; offset < 5; offset += 1) {
+          const cellDate = new Date(cursor);
+          cellDate.setDate(cursor.getDate() + offset);
+          const iso = toISO(cellDate);
+          const inMonth = cellDate.getMonth() === monthNo - 1;
+          week.push({
+            iso,
+            date: new Date(cellDate),
+            inMonth,
+            isHoliday: !!holidayMap[iso],
+            isTrading: inMonth && isTradingDay(iso)
+          });
+        }
+        weeks.push(week);
+      }
+      return weeks;
+    }
+
+    function getProductsForDate(iso, tab) {
+      const key = tab === "purchase" ? "purchaseDates" : "redeemDates";
+      return products.filter((item) => item[key].includes(iso));
+    }
+
+    function getCalendarCount(iso) {
+      let list = getProductsForDate(iso, state.tab);
+      if (state.type !== "all") {
+        list = list.filter((item) => item.category === state.type);
+      }
+      return list.length;
+    }
+
+    function ensureSelectedDate() {
+      const monthDays = buildCalendarWeeks(state.month)
+        .flat()
+        .filter((cell) => cell.isTrading)
+        .map((cell) => cell.iso);
+      if (!monthDays.includes(state.selectedDate)) {
+        state.selectedDate = monthDays[monthDays.length - 1];
+      }
+    }
+
+    function summaryText() {
+      const base = `${state.tab === "purchase" ? "认/申购日历" : "赎回日历"} · ${getTypeLabel(state.type)}`;
+      return base;
+    }
+
+    function renderCalendar() {
+      const weeks = buildCalendarWeeks(state.month);
+      const selectedIndex = weeks.findIndex((week) => week.some((cell) => cell.iso === state.selectedDate));
+      const visibleWeeks = state.collapsed && selectedIndex >= 0 ? [weeks[selectedIndex]] : weeks;
+
+      elements.monthTrigger.textContent = getMonthLabel(state.month);
+      elements.typeTrigger.textContent = getTypeLabel(state.type);
+      elements.calendarGrid.innerHTML = "";
+
+      visibleWeeks.forEach((week) => {
+        const row = document.createElement("div");
+        row.className = "calendar-week";
+
+        week.forEach((cell) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          const productCount = cell.isTrading ? getCalendarCount(cell.iso) : 0;
+          const classes = ["calendar-day"];
+
+          if (!cell.inMonth) {
+            classes.push("empty");
+            button.disabled = true;
+            button.innerHTML = "";
+          } else if (cell.isHoliday) {
+            classes.push("empty", "holiday");
+            button.innerHTML = `<div class="day-no">${cell.date.getDate()}</div><div class="day-sub">${holidayMap[cell.iso]}</div>`;
+          } else {
+            if (cell.iso === state.selectedDate) {
+              classes.push("selected");
+            }
+            button.innerHTML = `
+              <div class="day-no">${cell.date.getDate()}</div>
+              <div class="day-sub">${productCount > 0 ? `${productCount}只产品开放` : "暂无开放产品"}</div>
+              ${productCount > 0 ? '<span class="day-dot"></span>' : ""}
+            `;
+            button.addEventListener("click", () => {
+              state.selectedDate = cell.iso;
+              render();
+            });
+          }
+
+          button.className = classes.join(" ");
+          row.appendChild(button);
+        });
+
+        elements.calendarGrid.appendChild(row);
+      });
+
+      elements.toggleCalendar.textContent = state.collapsed ? "展开为整月视图" : "收起为单周视图";
+    }
+
+    function buildListFilters() {
+      elements.listFilters.innerHTML = "";
+
+      const heldBtn = document.createElement("button");
+      heldBtn.type = "button";
+      heldBtn.className = `switch-chip${state.showHeldOnly ? " active" : ""}`;
+      heldBtn.textContent = "仅查看持有产品";
+      heldBtn.addEventListener("click", () => {
+        state.showHeldOnly = !state.showHeldOnly;
+        renderProducts();
+      });
+      elements.listFilters.appendChild(heldBtn);
+
+      if (state.tab === "purchase") {
+        const reminderBtn = document.createElement("button");
+        reminderBtn.type = "button";
+        reminderBtn.className = `switch-chip${state.showReminderOnly ? " active" : ""}`;
+        reminderBtn.textContent = "仅查看开售提醒产品";
+        reminderBtn.addEventListener("click", () => {
+          state.showReminderOnly = !state.showReminderOnly;
+          renderProducts();
+        });
+        elements.listFilters.appendChild(reminderBtn);
+      }
+    }
+
+    function renderProducts() {
+      elements.selectedDateText.textContent = formatDateLabel(state.selectedDate);
+      elements.selectedSummary.textContent = summaryText();
+      buildListFilters();
+
+      let list = getProductsForDate(state.selectedDate, state.tab);
+      if (state.type !== "all") {
+        list = list.filter((item) => item.category === state.type);
+      }
+      if (state.showHeldOnly) {
+        list = list.filter((item) => item.holding);
+      }
+      if (state.tab === "purchase" && state.showReminderOnly) {
+        list = list.filter((item) => item.reminder);
+      }
+
+      elements.productList.innerHTML = "";
+      elements.emptyState.classList.toggle("hidden", list.length > 0);
+
+      list.forEach((item) => {
+        const card = document.createElement("div");
+        card.className = "product-card";
+        card.innerHTML = `
+          <div class="product-top">
+            <h5 class="product-name">${item.name}</h5>
+            ${state.tab === "purchase" ? `<button class="alert-btn${item.reminder ? " active" : ""}" type="button">${item.reminder ? "已提醒" : "开售提醒"}</button>` : ""}
+          </div>
+          <div class="product-sub">
+            <span class="risk-pill">${item.risk}</span>
+            <span>${item.code}</span>
+          </div>
+          <div class="metric-row">
+            ${item.metrics.map((metric) => `
+              <div class="metric-box">
+                <div class="metric-value${metric.hot ? " hot" : ""}">${metric.value}</div>
+                <div class="metric-label">${metric.label}</div>
+              </div>
+            `).join("")}
+          </div>
+        `;
+
+        if (state.tab === "purchase") {
+          const alertBtn = card.querySelector(".alert-btn");
+          alertBtn.addEventListener("click", (event) => {
+            event.stopPropagation();
+            item.reminder = !item.reminder;
+            showToast(item.reminder ? "已加入开售提醒" : "已取消开售提醒");
+            renderProducts();
+            renderCalendar();
+          });
+        }
+
+        card.addEventListener("click", () => openDetail(item));
+        elements.productList.appendChild(card);
+      });
+    }
+
+    function renderDetail() {
+      const item = state.detailProduct;
+      if (!item) {
+        return;
+      }
+
+      const categoryText = item.category === "fixed" ? "固收私募" : "权益私募";
+      elements.detailType.textContent = `${categoryText} · ${item.subtype}`;
+      elements.detailName.textContent = item.name;
+      elements.detailCode.textContent = `产品代码 ${item.code}`;
+      elements.detailMetrics.innerHTML = item.metrics.map((metric) => `
+        <div class="metric-box">
+          <div class="metric-value${metric.hot ? " hot" : ""}">${metric.value}</div>
+          <div class="metric-label">${metric.label}</div>
+        </div>
+      `).join("");
+      elements.detailNote.innerHTML = [
+        `<span>${item.risk}</span>`,
+        ...item.detailBrief.map((text) => `<span>${text}</span>`)
+      ].join("<span>|</span>");
+    }
+
+    function openDetail(item) {
+      state.detailProduct = item;
+      renderDetail();
+      elements.calendarScreen.classList.add("hidden");
+      elements.detailScreen.classList.remove("hidden");
+      elements.detailScreen.scrollTop = 0;
+      elements.riskOverlay.classList.toggle("hidden", riskRank[item.risk] <= riskRank[userRisk]);
+    }
+
+    function closeDetail() {
+      elements.detailScreen.classList.add("hidden");
+      elements.calendarScreen.classList.remove("hidden");
+      elements.riskOverlay.classList.add("hidden");
+    }
+
+    function openSheet(kind) {
+      state.currentSheet = kind;
+      elements.sheetTitle.textContent = kind === "month" ? "选择月份" : "选择产品类型";
+      const options = kind === "month" ? monthOptions : typeOptions;
+      const current = state[kind];
+      elements.sheetOptions.innerHTML = "";
+
+      options.forEach((option) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `sheet-option${current === option.key ? " active" : ""}`;
+        button.textContent = option.label;
+        button.addEventListener("click", () => {
+          state[kind] = option.key;
+          ensureSelectedDate();
+          closeSheet();
+          render();
+        });
+        elements.sheetOptions.appendChild(button);
+      });
+
+      elements.sheetOverlay.classList.remove("hidden");
+    }
+
+    function closeSheet() {
+      elements.sheetOverlay.classList.add("hidden");
+      state.currentSheet = null;
+    }
+
+    let toastTimer = null;
+    function showToast(text) {
+      elements.toast.textContent = text;
+      elements.toast.classList.remove("hidden");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        elements.toast.classList.add("hidden");
+      }, 1800);
+    }
+
+    function render() {
+      ensureSelectedDate();
+      elements.tabs.forEach((tab) => {
+        tab.classList.toggle("active", tab.dataset.tab === state.tab);
+      });
+      elements.tipBanner.classList.toggle("hidden", state.tab !== "purchase");
+      renderCalendar();
+      renderProducts();
+    }
+
+    elements.tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        state.tab = tab.dataset.tab;
+        state.showReminderOnly = false;
+        render();
+      });
+    });
+
+    elements.closeTipBanner.addEventListener("click", () => {
+      elements.tipBanner.classList.add("hidden");
+    });
+
+    elements.openTipDialog.addEventListener("click", () => {
+      elements.tipDialog.classList.remove("hidden");
+    });
+
+    elements.closeTipDialog.addEventListener("click", () => {
+      elements.tipDialog.classList.add("hidden");
+    });
+
+    elements.tipDialog.addEventListener("click", (event) => {
+      if (event.target === elements.tipDialog) {
+        elements.tipDialog.classList.add("hidden");
+      }
+    });
+
+    elements.monthTrigger.addEventListener("click", () => openSheet("month"));
+    elements.typeTrigger.addEventListener("click", () => openSheet("type"));
+    elements.closeSheet.addEventListener("click", closeSheet);
+    elements.sheetOverlay.addEventListener("click", (event) => {
+      if (event.target === elements.sheetOverlay) {
+        closeSheet();
+      }
+    });
+
+    elements.toggleCalendar.addEventListener("click", () => {
+      state.collapsed = !state.collapsed;
+      renderCalendar();
+    });
+
+    elements.detailBack.addEventListener("click", closeDetail);
+    elements.riskBack.addEventListener("click", closeDetail);
+    elements.riskContinue.addEventListener("click", () => {
+      elements.riskOverlay.classList.add("hidden");
+    });
+
+    render();
+  </script>
+</body>
+</html>
