@@ -311,7 +311,8 @@
 
     .calendar-head {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(5, 66px);
+      justify-content: space-between;
       gap: 8px;
       margin-bottom: 10px;
       padding: 0 2px;
@@ -328,14 +329,20 @@
 
     .calendar-week {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(5, 66px);
+      justify-content: space-between;
       gap: 8px;
     }
 
     .calendar-day {
       position: relative;
-      min-height: 62px;
-      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      width: 66px;
+      height: 66px;
+      padding: 8px 6px;
       border-radius: 16px;
       background: #fbf8f3;
       color: #54483d;
@@ -377,12 +384,14 @@
     .day-no {
       font-size: 16px;
       font-weight: 800;
+      line-height: 1;
     }
 
     .day-sub {
       margin-top: 5px;
       font-size: 11px;
       color: #948779;
+      line-height: 1.1;
     }
 
     .day-dot {
@@ -1292,12 +1301,12 @@
       if (exact.length === 0) {
         return [];
       }
-      if (exact.length >= 2) {
+      if (exact.length >= 5) {
         return exact.slice(0, 10);
       }
 
       const seed = exact[0];
-      const supplemental = products.filter((item) => {
+      const sameCategorySupplemental = products.filter((item) => {
         if (exact.some((target) => target.id === item.id)) {
           return false;
         }
@@ -1307,7 +1316,17 @@
         return item[key].some((date) => date.startsWith(iso.slice(0, 7)));
       });
 
-      return [...exact, ...supplemental].slice(0, 10);
+      const broaderSupplemental = products.filter((item) => {
+        if (exact.some((target) => target.id === item.id)) {
+          return false;
+        }
+        if (sameCategorySupplemental.some((target) => target.id === item.id)) {
+          return false;
+        }
+        return item[key].some((date) => date.startsWith(iso.slice(0, 7)));
+      });
+
+      return [...exact, ...sameCategorySupplemental, ...broaderSupplemental].slice(0, 10);
     }
 
     function getCalendarCount(iso) {
@@ -1365,7 +1384,7 @@
             }
             button.innerHTML = `
               <div class="day-no">${cell.date.getDate()}</div>
-              <div class="day-sub">${productCount > 0 ? `${productCount}只产品开放` : "暂无开放产品"}</div>
+              <div class="day-sub">${productCount > 0 ? `共${productCount}只` : ""}</div>
               ${productCount > 0 ? '<span class="day-dot"></span>' : ""}
             `;
             button.addEventListener("click", () => {
